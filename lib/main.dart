@@ -1,4 +1,3 @@
-import 'package:chat_application/services/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'pages/login.dart'; // Veya ilgili sayfa
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: LoginPage(), // Ana giriş sayfası
+        home: LoginPage(false), // Ana giriş sayfası
       ),
     );
   }

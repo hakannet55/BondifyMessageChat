@@ -21,7 +21,13 @@ class _RegisterPageState extends State<RegisterPage> {
         'password': _passwordController.text,
       }),
       headers: {'Content-Type': 'application/json'},
-    );
+    ).catchError((onError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sunucu hatası. Lütfen tekrar deneyin.')),
+      );
+      //reload page
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RegisterPage()));
+    });
 
     if (response.statusCode == 201) {
       Navigator.pop(context);  // Kayıt başarılıysa giriş sayfasına dön
@@ -43,17 +49,21 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Kullanıcı Adı'),
+              decoration: InputDecoration(labelText: 'Kullanıcı Adı',filled: true,fillColor: Colors.white60),
             ),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Şifre'),
+              decoration: InputDecoration(labelText: 'Şifre',filled: true,fillColor: Colors.white60),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _register,
-              child: Text('Kayıt Ol'),
+              child: Text('Kayıt Ol'),style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                textStyle: TextStyle(fontSize: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              )
             ),
           ],
         ),

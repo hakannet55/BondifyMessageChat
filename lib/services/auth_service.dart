@@ -6,6 +6,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../conf.dart';
 
 class AuthService {
+  Future<bool> tokenValidity() async {
+    final token = await getToken();
+    if (token == null) {
+      return false;
+    }
+    final response = await http.post(
+      Uri.parse(new Conf().url(UrlTypes.tokenValidity)),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+    );
+    return response.body == "1";
+  }
   // API'den gelen yanıt ile token'ı almak ve saklamak
   Future<String?> login(String username, String password) async {
     final response = await http.post(
@@ -45,5 +59,17 @@ class AuthService {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_token');
+  }
+
+  int getTokenUserId() {
+    // example tokens="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiJ2YWx1ZSIsImtleTIiOiJ2YWx1ZTIiLCJpYXQiOjE2MzQxNzgxMTB9.vnXM0oxw05QH1Vs6RsvYp6LaEqFFqZ-NExQMXBgP7Mk";
+    // jwt token datasını almak
+    final token = getToken();
+    final tokenParts = token?.toString().split('.');
+    if(tokenParts==null || tokenParts!.length < 2) return 0;
+
+    final payload = tokenParts?[1];
+    final payloadJson = json.decode(utf8.decode(base64.decode(payload!)));
+    return int.parse(payloadJson['id']);
   }
 }
