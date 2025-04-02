@@ -1,10 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../conf.dart';
 import '../services/chat_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -148,11 +144,14 @@ class _ChatScreenState extends State<ChatScreen> {
   void toBottom() {
     // autoscroll to bottom
     Future.delayed(Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeOut
-      );
+      if(_scrollController.hasClients && _scrollController.position.maxScrollExtent > 0){
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+      // _scrollController.animateTo(
+      //     _scrollController.position.maxScrollExtent,
+      //     duration: Duration(milliseconds: 300),
+      //     curve: Curves.easeOut
+      // );
     });
   }
 }
