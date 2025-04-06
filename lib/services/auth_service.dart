@@ -61,15 +61,31 @@ class AuthService {
     await prefs.remove('user_token');
   }
 
-  int getTokenUserId() {
-    // example tokens="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiJ2YWx1ZSIsImtleTIiOiJ2YWx1ZTIiLCJpYXQiOjE2MzQxNzgxMTB9.vnXM0oxw05QH1Vs6RsvYp6LaEqFFqZ-NExQMXBgP7Mk";
-    // jwt token datasını almak
-    final token = getToken();
-    final tokenParts = token?.toString().split('.');
-    if(tokenParts==null || tokenParts!.length < 2) return 0;
+  Future<Map<String, dynamic>> getTokenObject() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Token boş veya null!');
+    }
 
-    final payload = tokenParts?[1];
-    final payloadJson = json.decode(utf8.decode(base64.decode(payload!)));
+    final tokenParts = token.split('.');
+    if (tokenParts.length < 2) {
+      throw Exception('Geçersiz token formatı!');
+    }
+
+    final payload = tokenParts[1];
+    // Uzunluğu kontrol ederek eksik "=" karakterlerini tamamla
+    String normalizedPayload = payload.padRight(payload.length + (4 - payload.length % 4) % 4, '=');
+    final decodedPayload = utf8.decode(base64Url.decode(normalizedPayload));
+    return json.decode(decodedPayload);
+  }
+
+  Future<int> getTokenUserId() async {
+    final payloadJson = await getTokenObject();
     return int.parse(payloadJson['id']);
+  }
+
+  Future<String> getTokenUserName() async {
+    final payloadJson = await getTokenObject();
+    return payloadJson['username'];
   }
 }

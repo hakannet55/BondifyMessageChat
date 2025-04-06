@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -33,12 +35,16 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadMessages();
+    // control new messages interval time
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      _loadMessages();
+    });
   }
 
   Future<void> _loadMessages() async {
     final messages = await _chatService.fetchMessages(userId);
     setState(() {
-      loader=false;
+      loader = false;
       _messages = messages;
       toBottom();
     });
@@ -46,9 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _sendMessage() async {
   final res = await _chatService.sendMessage(userId,_messageController.text);
-  print("_sendMessage");
-      print(res);
-     if(res == true){
+      if(res == true){
        setState(() {
          _messages.add({
            "id": userId,

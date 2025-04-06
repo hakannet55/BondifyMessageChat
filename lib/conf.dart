@@ -2,7 +2,7 @@ import 'dart:convert';
 
 enum UrlTypes { login, register, messages,users,tokenValidity,sendmessages }
 class Conf{
-  bool isDebug = true;
+  bool isDebug = false;
   static String baseUrl = "https://node-js-backend-chat-api.vercel.app/";
   static String local = 'http://localhost:3000/';
   //function url +base + url

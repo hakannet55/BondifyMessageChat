@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bondify_chat/pages/login.dart';
@@ -19,14 +20,24 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   List<dynamic> _userList = [];
   bool isEmpty=false;
+  String _loginUserName="";
+  AuthService _authService = AuthService();
   final _chatService =
       ChatService(); // ChatService sınıfının bir örneği oluşturun
-  //final _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     _loadUserList();
+    _authService.getTokenUserName().then((value) {
+      print("value");
+      print(value);
+      _loginUserName=value;
+    });
+    // interval 5 second refresh, infinity
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      _loadUserList();
+    });
   }
 
   Future<void> _loadUserList() async {
@@ -76,91 +87,109 @@ class _ChatPageState extends State<ChatPage> {
         ),
       )],)),
       body:
+        //button refles
+      ListView(
+            children: [
+      Container(
+      padding: EdgeInsets.all(16),
+      color: Colors.grey[200],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+        Text(
+        'Login:'+ _loginUserName,
+        style: TextStyle(fontSize: 18),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          // Yenileme işlemi burada yapılır
+          print('Yenileme düğmesine tıklandı!');
+        },
+        child: Text('Yenile'),
+      ),
+        ],
+      ),
+      ),
+
       isEmpty? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Kullanıcı bulunamadı",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[700]),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                // navigate login
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage(true)),
-                );
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Kullanıcı bulunamadı",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // navigate login
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage(true)),
+                  );
 
                 },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: Text("Ana Sayfa", style: TextStyle(color: Colors.white)),
               ),
-              child: Text("Ana Sayfa", style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ) : _userList.isEmpty
-              ? Center(
-                child: CircularProgressIndicator(color: Colors.deepPurple),
-              )
-              : ListView.builder(
-                padding: EdgeInsets.all(10),
-                itemCount: _userList.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 5, // Hafif gölgelendirme
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            Colors.deepPurpleAccent, // Avatar rengi
-                        child: Text(
-                          _userList[index]['username'][0].toUpperCase(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        _userList[index]['username'],
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        "Son konuşmalar...",
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      trailing: Icon(
-                        Icons.chat_bubble,
-                        color: Colors.deepPurpleAccent,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    ChatScreen(userId: _userList[index]['id']
-                                        ,targetUserName: _userList[index]['username']),
-                          ),
-                        );
-                      },
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                    ),
-                  );
-                },
-              ),
+            ],
+          ),
+        ) : _userList.isEmpty
+            ? Center(
+          child: CircularProgressIndicator(color: Colors.deepPurple),
+        ) : Column( children:renderListTileItems(_userList,context)
+      ),
+      ])
     );
   }
+
+  List<Widget> renderListTileItems(List userList,BuildContext context) {
+  final List<Widget> ary=[];
+  for (int i = 0; i < userList.length; i++) {
+    final item=userList[i];
+    ary.add(ListTile(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      leading: CircleAvatar(
+        backgroundColor:
+        Colors.deepPurpleAccent, // Avatar rengi
+        child: Text(
+          item['username'][0].toUpperCase(),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      title: Text(item['username'],
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        "Son konuşmalar...",
+        style: TextStyle(color: Colors.grey[700]),
+      ),
+      trailing: Icon(
+        Icons.chat_bubble,
+        color: Colors.deepPurpleAccent,
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) =>
+                ChatScreen(userId: 123,targetUserName:item['username']),
+          ),
+        );
+      },
+    ));
+  }
+  return ary;
+  }
+
 }
+
