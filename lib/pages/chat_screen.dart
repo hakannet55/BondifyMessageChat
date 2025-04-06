@@ -134,7 +134,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return "-";
     }
     final message = _messages[index];
-    if (isSame(index)) {
+    if (!isSame(index)) {
       return 'Ben: ${message['message']}';
     } else {
       return 'Birisi: ${message['message']}';
